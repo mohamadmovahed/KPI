@@ -164,7 +164,7 @@ describe('assistant engine', () => {
   it('diagnoses "Our customer churn increased from 4% to 7%"', () => {
     const r = runAssistant(kb, 'Our customer churn increased from 4% to 7%. What should I investigate?');
     expect(r.intent).toBe('diagnose');
-    expect(r.summary).toMatch(/4% to 7%/);
+    expect(r.cards[0].kind === 'insight' && r.cards[0].body).toMatch(/4% to 7%/);
     expect(r.cards.some((c) => c.kind === 'driver-tree')).toBe(true);
   });
 
@@ -237,5 +237,17 @@ describe('validation', () => {
   it('accepts engine-shaped LLM responses and rejects unknown cards', () => {
     expect(llmResponseSchema.safeParse({ summary: 'x', cards: [{ kind: 'insight', title: 't', body: 'b' }], followUps: [] }).success).toBe(true);
     expect(llmResponseSchema.safeParse({ summary: 'x', cards: [{ kind: 'html', body: '<script>' }], followUps: [] }).success).toBe(false);
+  });
+});
+
+describe('strategy map hygiene', () => {
+  it('never assigns a KPI and its inverse to the same objective', () => {
+    for (const themes of [['loyalty'], ['growth', 'loyalty'], []]) {
+      const map = generateStrategyMap(kb, { themes, industry: 'telecom' });
+      for (const o of map.objectives) {
+        const ks = kb.require(o.kpiIds);
+        expect(ks.some((k) => k.inverseOf && o.kpiIds.includes(k.inverseOf)), o.title).toBe(false);
+      }
+    }
   });
 });

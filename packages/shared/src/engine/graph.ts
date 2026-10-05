@@ -73,9 +73,9 @@ export class KpiGraph {
    * Longest causal chain from capabilities up to a financial outcome passing through `id`
    * (e.g. Skills → FCR → NPS → Churn → Revenue → ROIC). Used for "how does this create value?".
    */
-  valueChain(id: string): Kpi[] {
-    const up = this.longestPath(id, (n) => this.out.get(n), new Set());
-    const down = this.longestPath(id, (n) => this.inc.get(n), new Set());
+  valueChain(id: string, maxEachSide = 3): Kpi[] {
+    const up = this.longestPath(id, (n) => this.out.get(n), new Set(), maxEachSide);
+    const down = this.longestPath(id, (n) => this.inc.get(n), new Set(), maxEachSide);
     return [...down.reverse(), ...up.slice(1)].map((x) => this.byId.get(x)!);
   }
 

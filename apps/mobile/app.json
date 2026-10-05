@@ -1,17 +1,25 @@
 {
   "expo": {
-    "name": "mobile",
-    "slug": "mobile",
-    "version": "1.0.0",
+    "name": "KPI Consultant",
+    "slug": "kpi-consultant",
+    "scheme": "kpiconsultant",
+    "version": "0.1.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
-    "userInterfaceStyle": "light",
+    "userInterfaceStyle": "automatic",
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "app.kpiconsultant.mobile",
+      "config": { "usesNonExemptEncryption": false },
+      "infoPlist": {
+        "NSMicrophoneUsageDescription": "Use your voice to ask the KPI assistant questions.",
+        "NSSpeechRecognitionUsageDescription": "Converts your spoken questions to text for the KPI assistant."
+      }
     },
     "android": {
+      "package": "app.kpiconsultant.mobile",
       "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE",
+        "backgroundColor": "#0B1F3A",
         "foregroundImage": "./assets/android-icon-foreground.png",
         "backgroundImage": "./assets/android-icon-background.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"
@@ -24,7 +32,17 @@
     "plugins": [
       "expo-router",
       "expo-secure-store",
-      "expo-sharing"
-    ]
+      "expo-sharing",
+      [
+        "expo-image-picker",
+        {
+          "cameraPermission": "Take a photo of a strategy map, KPI table or dashboard so the assistant can analyse it.",
+          "photosPermission": "Choose a screenshot or photo of a KPI table or strategy document to analyse."
+        }
+      ]
+    ],
+    "extra": {
+      "apiUrl": "http://localhost:4000"
+    }
   }
 }

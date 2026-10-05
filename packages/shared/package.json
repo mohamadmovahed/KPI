@@ -15,5 +15,6 @@
   },
   "dependencies": {
     "zod": "^4.6.5"
-  }
+  },
+  "type": "module"
 }

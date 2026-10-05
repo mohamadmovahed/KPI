@@ -125,7 +125,10 @@ export function runAssistant(kb: KnowledgeBase, message: string, ctx: AiContext 
     case 'diagnose': {
       const k = mentions[0];
       const d = diagnose(k, kb.graph, fromTo(message));
-      summary = d.headline;
+      summary =
+        d.deterioration === false
+          ? `${k.name} improved. Confirm it is real (definition, data, one-offs) and find which drivers moved so you can sustain it.`
+          : `Start by ruling out measurement effects and locating where the change is concentrated, then test the drivers below — ${kb.graph.drivers(k.id).length ? 'leading indicators first, since they usually move before ' + k.name : 'starting with the largest controllable ones'}.`;
       cards.push({ kind: 'insight', title: 'Assessment', body: d.headline, severity: d.severity });
       cards.push({ kind: 'checklist', title: 'Rule these out first', items: d.questions.slice(0, 4) });
       cards.push({ kind: 'driver-tree', title: 'Driver tree', tree: d.driverTree });

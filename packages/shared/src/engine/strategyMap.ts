@@ -23,7 +23,7 @@ const TEMPLATES: ObjectiveTemplate[] = [
   { title: 'Improve profitability', perspective: 'financial', themes: ['profitability', 'cost'], kpiIds: ['ebitda-margin', 'opex-to-revenue', 'gross-margin'] },
   { title: 'Increase return on capital', perspective: 'financial', themes: ['value-creation'], kpiIds: ['roic', 'roe', 'capex-intensity'] },
   { title: 'Strengthen cash generation', perspective: 'financial', themes: ['cash'], kpiIds: ['free-cash-flow-conversion', 'cash-conversion-cycle'] },
-  { title: 'Improve customer loyalty', perspective: 'customer', themes: ['loyalty'], kpiIds: ['churn-rate', 'retention-rate', 'nps'] },
+  { title: 'Improve customer loyalty', perspective: 'customer', themes: ['loyalty'], kpiIds: ['churn-rate', 'nps', 'retention-rate', 'customer-engagement'] },
   { title: 'Deliver a superior customer experience', perspective: 'customer', themes: ['satisfaction'], kpiIds: ['nps', 'csat', 'customer-effort-score'] },
   { title: 'Win profitable new customers', perspective: 'customer', themes: ['acquisition', 'growth'], kpiIds: ['conversion-rate', 'market-share', 'customer-acquisition-cost'] },
   { title: 'Deepen customer relationships', perspective: 'customer', themes: ['engagement'], kpiIds: ['products-per-customer', 'customer-engagement'] },
@@ -76,7 +76,13 @@ export function generateStrategyMap(kb: KnowledgeBase, opts: { themes?: string[]
       .sort((a, b) => b.score - a.score)
       .slice(0, per);
     for (const { t } of ranked) {
-      objectives.push({ id: newId('obj'), title: t.title, perspective: p, kpiIds: t.kpiIds.filter(fits).slice(0, 3), x: 0, y: 0 });
+      // Never put a KPI and its inverse (e.g. churn and retention) on the same objective.
+      const kpiIds: string[] = [];
+      for (const id of t.kpiIds.filter(fits)) {
+        const k = kb.get(id)!;
+        if (kpiIds.length < 3 && !kpiIds.some((x) => x === k.inverseOf || kb.get(x)?.inverseOf === id)) kpiIds.push(id);
+      }
+      objectives.push({ id: newId('obj'), title: t.title, perspective: p, kpiIds, x: 0, y: 0 });
     }
   }
   return { objectives: layoutObjectives(objectives), links: inferLinks(kb, objectives) };

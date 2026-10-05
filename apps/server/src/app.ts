@@ -54,7 +54,7 @@ export async function buildApp(opts: BuildOptions = {}) {
   };
 
   await app.register(helmet);
-  await app.register(cors, { origin: config.corsOrigins.length ? config.corsOrigins : false });
+  await app.register(cors, { origin: config.corsOrigins.length ? config.corsOrigins : false, methods: ['GET', 'HEAD', 'POST', 'PUT', 'PATCH', 'DELETE'] });
   await app.register(rateLimit, { max: 300, timeWindow: '1 minute' });
   await app.register(multipart);
 
