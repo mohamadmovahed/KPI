@@ -34,7 +34,7 @@ The tokens are in `apps/mobile/src/theme/tokens.ts`. The components are in `apps
 | `Accordion` | Collapsible sections on KPI detail |
 | `Segmented` | Scrollable tabs in the project workspace |
 | `ListRow`, `SectionHeader`, `Divider`, `Row` | Lists and layout |
-| `EmptyState`, `ErrorState`, `Skeleton`, `OfflineBanner` | Empty, error, loading and offline states |
+| `EmptyState`, `ErrorState`, `Skeleton` | Empty, error and loading states |
 | `Fab` | Floating create action |
 | `KpiCard`, `KpiRow`, `KpiBadges`, `QualityPill` | KPI building blocks |
 | `AiCardView` | AI response cards: recommendation, insight, checklist, KPI list, comparison, driver tree, balance, map proposal |

@@ -14,7 +14,6 @@ import {
   useWindowDimensions,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useNetwork } from '@/state/network';
 import { radius, space, touch } from '@/theme/tokens';
 import { useTheme } from '@/theme/ThemeProvider';
 import { AppText, Button, Icon, type IconName } from './primitives';
@@ -158,20 +157,6 @@ export function Skeleton({ height = 16, width = '100%' as number | `${number}%`,
     return () => loop.stop();
   }, [opacity]);
   return <Animated.View style={[{ height, width, borderRadius: 6, backgroundColor: colors.surfaceAlt, opacity }, style]} />;
-}
-
-export function OfflineBanner() {
-  const online = useNetwork((s) => s.online);
-  const { colors } = useTheme();
-  if (online) return null;
-  return (
-    <View accessibilityRole="alert" style={{ flexDirection: 'row', alignItems: 'center', gap: space.sm, paddingHorizontal: space.lg, paddingVertical: space.sm, backgroundColor: colors.warningSoft }}>
-      <Ionicons name="cloud-offline-outline" size={16} color={colors.warning} />
-      <AppText variant="caption" color={colors.warning} style={{ flex: 1 }}>
-        You’re offline. Library, saved items and projects work; AI answers use the offline engine.
-      </AppText>
-    </View>
-  );
 }
 
 // ---------- Segmented navigation ----------

@@ -1,11 +1,13 @@
-# KPI Consultant — mobile strategy & KPI intelligence
+# KPI Consultant (offline Android app)
 
-A **mobile-first** (iOS + Android) professional tool for strategy consultants and managers: find and
-understand KPIs in seconds, get AI recommendations and diagnostics, build touch-enabled strategy maps,
-check whether a KPI set is balanced, and share an executive summary — all from a phone, including
-offline in meetings.
+A local Android app for strategy consultants and managers. You can find and understand KPIs in
+seconds, get recommendations and diagnostics, build strategy maps by touch, check whether a KPI set
+is balanced, and share an executive summary.
 
-| Home | Search | KPI detail | AI diagnosis | Strategy map |
+**There is no server, no account and no internet requirement.** The KPI knowledge base, search,
+assistant, projects and reports all run and are stored on the phone.
+
+| Home | Search | KPI detail | Diagnosis | Strategy map |
 |---|---|---|---|---|
 | ![](docs/screenshots/02-home.png) | ![](docs/screenshots/03-search.png) | ![](docs/screenshots/05-kpi-detail-expanded.png) | ![](docs/screenshots/06-assistant-diagnose.png) | ![](docs/screenshots/09-map.png) |
 
@@ -13,92 +15,67 @@ offline in meetings.
 |---|---|---|---|
 | ![](docs/screenshots/10-map-objective-sheet.png) | ![](docs/screenshots/13-balanced.png) | ![](docs/screenshots/12-summary.png) | ![](docs/screenshots/14-home-dark.png) |
 
-*Screenshots are from the real app (Expo web build at 390×844), captured by the end-to-end walkthrough of the acceptance criteria.*
+*The screenshots come from the app's own UI code, rendered at phone size (390×844) during an automated walkthrough with no server running.*
 
-## Architecture at a glance
+## Get the APK
 
+**Option A: GitHub Actions (no setup).** Every push that changes the app runs
+[`.github/workflows/android-apk.yml`](.github/workflows/android-apk.yml). Open the repository's
+**Actions** tab, select the latest **Build Android APK** run, and download **kpi-consultant-apk**
+from *Artifacts*. You can also start it by hand with *Run workflow*. Unzip the artifact, copy
+`app-release.apk` to the phone, and open it to install. Android will ask you to allow installs from
+that source.
+
+**Option B: build on your computer** (Node 22, JDK 17 and Android Studio/SDK):
+
+```bash
+npm install
+cd apps/mobile
+npx expo prebuild --platform android
+cd android && ./gradlew assembleRelease
+# → apps/mobile/android/app/build/outputs/apk/release/app-release.apk
 ```
-Mobile Strategy Consultant   apps/mobile   React Native + Expo (SDK 57), Expo Router, Reanimated, Gesture Handler
-        │  supported by
-AI Engine                    apps/server   Fastify API · AI orchestrator (Claude, structured outputs) · auth · sync
-        │  supported by
-KPI Knowledge Base           packages/shared/src/data   curated KPIs, sources, benchmarks
-        │  supported by
-Strategy / KPI Relationship  packages/shared/src/engine  cause-and-effect graph, balance, diagnosis, maps
-        │  supported by
-Benchmark & org data         server store (projects, orgs, members, audit) → Postgres in production
-```
 
-- **Why React Native + Expo:** one TypeScript codebase for iOS and Android, shares the domain engine
-  with the backend byte-for-byte, mature gesture/animation stack for the touch strategy map, OTA updates
-  via EAS, and no native projects to maintain (Continuous Native Generation).
-- **Offline-first:** the knowledge base, search, relationship graph, balance check, diagnostics,
-  strategy-map generation and executive summaries all run **on device** from the shared package.
-  Projects, saved KPIs, collections and AI conversations are cached locally and synced when online.
-- **AI layer:** the deterministic engine always answers first (fast, grounded, offline-capable); when
-  `ANTHROPIC_API_KEY` is set the server has Claude refine the engine draft into consultant-grade cards
-  via structured outputs, validated against the knowledge base (no invented KPI ids), with automatic
-  fallback to the engine answer on any failure.
+**Option C: Expo cloud build:** `cd apps/mobile && npx eas-cli build -p android --profile apk`.
 
-Details: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) · Roadmap/phase status: [docs/ROADMAP.md](docs/ROADMAP.md) ·
-Design system: [docs/DESIGN_SYSTEM.md](docs/DESIGN_SYSTEM.md)
+> These APKs are signed with the default debug key, which is fine for installing on your own devices.
+> For Google Play, create your own release keystore and build the `production` (AAB) profile.
+
+## What works offline
+
+- **KPI Library:** 60 curated KPIs with natural-language search ("KPIs for customer loyalty in
+  telecom") and filters for industry, function, level, BSC perspective, leading/lagging and KPI type.
+- **KPI detail:** definition, formula with an example, strategic role, leading and lagging relations,
+  drivers, trade-offs, gaming risks, data requirements, benchmarks, sources, quality score, a
+  relationship graph and comparison.
+- **Assistant:** a rule-based engine on the phone. It recommends balanced KPI sets, explains and
+  compares KPIs, diagnoses KPI changes ("churn increased from 4% to 7%") with driver trees, reviews
+  balance, drafts strategy maps and gives target-setting guidance.
+- **Projects:** a workspace with Overview, Strategy, KPIs, Targets, Initiatives, Diagnostics and
+  Reports tabs. The touch strategy map supports pinch, pan, tap, long-press to connect and drag.
+- **Sharing:** executive summaries, KPI cards and diagnoses go out through the Android share sheet, as
+  a PDF, by copy or by email.
+- **Saved KPIs and collections**, light and dark mode.
+- **Backup and restore** (Settings): export everything to a JSON file and restore it on any phone.
+  Data never leaves the device unless you share or export it.
 
 ## Repository layout
 
 ```
-apps/mobile      Expo app (src/app = routes, src/components, src/state, src/services, src/theme)
-apps/server      Fastify API (routes, AI orchestrator, auth, store) + tests
-packages/shared  Domain types, KPI dataset, engines (search, quality, graph, recommend, balance,
-                 diagnose, strategy map, summary, assistant), zod validation + tests
+apps/mobile      Expo / React Native Android app (src/app = screens, src/components, src/state, src/services)
+packages/shared  KPI dataset and reasoning engines (search, quality, graph, recommend, balance,
+                 diagnose, strategy map, summary, assistant), validation, unit tests
 docs/            Architecture, roadmap, design system, screenshots
 ```
 
-## Getting started
-
-Requirements: Node 20+ (22 recommended), npm 10+. For devices: Expo Go is **not** enough for every
-native module long-term; use a development build (`npx expo run:ios|android` or `eas build --profile development`).
+## Development
 
 ```bash
-npm install                      # installs all workspaces
-
-# API (http://localhost:4000). Seeds demo@kpi.app / demo1234 outside production.
-cp apps/server/.env.example apps/server/.env   # optional: add ANTHROPIC_API_KEY to enable the LLM layer
-npm run dev:server
-
-# Mobile app
-npm run dev:mobile               # then press i (iOS simulator), a (Android) or scan the QR code
+npm install
+npm test            # engine unit tests
+npm run typecheck
+npm start           # Expo dev server; press "a" for an Android emulator or device
 ```
 
-On a physical device, set the API URL to your machine's LAN address in **More → Settings → Server**
-(or `expo.extra.apiUrl` in `apps/mobile/app.json`). You can also tap **Explore without an account**:
-everything works locally and the assistant uses the on-device engine.
-
-### Quality checks
-
-```bash
-npm test          # shared engine tests + API integration tests (vitest)
-npm run typecheck # shared, server, mobile
-cd apps/mobile && npx expo export --platform android   # verifies the native bundle builds
-```
-
-## Acceptance criteria (all from a smartphone)
-
-| # | Use case | Where |
-|---|---|---|
-| 1 | Search “KPIs for customer loyalty in telecom” | KPI Library — natural-language interpretation (“understood: Telecom, loyalty”), filter chips → bottom sheets |
-| 2 | Open a KPI: definition, formula, leading/lagging, level, BSC, related KPIs, sources | KPI detail — collapsible sections, value chain, relationship graph |
-| 3 | “Our customer churn increased from 4% to 7%. What should I investigate?” | AI Assistant — assessment, checks, expandable driver tree, hypotheses, data to request |
-| 4 | Create project “Telecom Strategy 2027–2030” | Projects → New project |
-| 5 | Add KPIs to the project | Any KPI card / detail / AI recommendation → *Add to project*; project KPI picker; collections |
-| 6 | Build & edit a strategy map by touch | Project → Strategy map — pinch, pan, tap, long-press to connect, drag, add/edit objectives & KPIs |
-| 7 | “Are my KPIs balanced?” | Assistant with project context, or Project → Diagnostics |
-| 8 | Generate & share an executive summary | Project → Reports → Executive summary — Share, PDF, Copy, Email |
-
-## Security notes
-
-- Passwords hashed with scrypt; short-lived JWT access tokens (15 min) + rotating refresh tokens with
-  reuse detection (stored hashed); tokens on device live in Keychain/Keystore (`expo-secure-store`).
-- Org-scoped data, project-level permissions (owner/editor/viewer), role-based admin endpoints,
-  audit log that never stores prompt or project content, request logging with credential redaction,
-  Helmet headers, rate limiting, zod validation on every input, upload type/size limits.
-- Use HTTPS in production and set `JWT_SECRET` (≥ 32 chars; with `NODE_ENV=production` the server refuses to start without it).
+A development build (`cd apps/mobile && npx expo run:android`) loads code from your computer, so it
+needs a connection to it. The release APK is self-contained.

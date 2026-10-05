@@ -9,7 +9,6 @@ import { BottomSheet, EmptyState } from '@/components/ui/feedback';
 import { AppText, Button, Chip, IconButton, ListRow, Row, TextField } from '@/components/ui/primitives';
 import { useKb } from '@/services/knowledgeBase';
 import { share } from '@/services/share';
-import { syncProjects } from '@/services/sync';
 import { useProject, useProjects } from '@/state/projects';
 import { radius, space } from '@/theme/tokens';
 import { useTheme } from '@/theme/ThemeProvider';
@@ -30,14 +29,12 @@ export default function StrategyMapScreen() {
   const objective = project?.map.objectives.find((o) => o.id === selected);
   const kpiHits = useMemo(() => kb.index.search(kpiQuery || objective?.title || '', { limit: 12 }).hits.map((h) => h.kpi), [kb, kpiQuery, objective?.title]);
   if (!project) return <EmptyState icon="git-network-outline" title="Project not found" />;
-  const changed = () => syncProjects();
 
   const onTap = (oid: string) => {
     if (connectFrom) {
       if (oid !== connectFrom) {
         store.toggleLink(project.id, connectFrom, oid);
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => undefined);
-        changed();
       }
       setConnectFrom(undefined);
       return;
@@ -102,7 +99,6 @@ export default function StrategyMapScreen() {
             onPress={() => {
               const themes = kb.index.search(`${project.name} ${project.strategyStatement ?? ''}`).interpretation.themes;
               store.setMap(project.id, generateStrategyMap(kb, { themes, industry: project.industry }));
-              changed();
             }}
           />
         </View>
@@ -119,7 +115,6 @@ export default function StrategyMapScreen() {
           }}
           onMoveObjective={(oid, x, y) => {
             store.moveObjective(project.id, oid, x, y);
-            changed();
           }}
           onTapBackground={() => setConnectFrom(undefined)}
         />
@@ -127,7 +122,7 @@ export default function StrategyMapScreen() {
 
       <Row style={{ padding: space.md, paddingBottom: space.xl, borderTopWidth: 1, borderTopColor: colors.border, backgroundColor: colors.surface }}>
         <Button title="Objective" icon="add" onPress={() => (setTitle(''), setSheet('add'))} style={{ flex: 1 }} />
-        <Button title="Tidy" icon="grid-outline" variant="secondary" onPress={() => (store.autoLayout(project.id), changed())} disabled={!project.map.objectives.length} />
+        <Button title="Tidy" icon="grid-outline" variant="secondary" onPress={() => (store.autoLayout(project.id))} disabled={!project.map.objectives.length} />
       </Row>
 
       {/* Objective details */}
@@ -143,7 +138,7 @@ export default function StrategyMapScreen() {
               <KpiRow
                 key={k.id}
                 kpi={k}
-                right={<IconButton icon="close" size={18} label={`Remove ${k.name}`} onPress={() => (store.updateObjective(project.id, objective.id, { kpiIds: objective.kpiIds.filter((x) => x !== k.id) }), changed())} />}
+                right={<IconButton icon="close" size={18} label={`Remove ${k.name}`} onPress={() => (store.updateObjective(project.id, objective.id, { kpiIds: objective.kpiIds.filter((x) => x !== k.id) }))} />}
               />
             ))}
             {leading.length > 0 && (
@@ -152,7 +147,7 @@ export default function StrategyMapScreen() {
                   LEADING INDICATORS
                 </AppText>
                 {leading.map((k) => (
-                  <KpiRow key={k.id} kpi={k} right={<AppText variant="label" color={colors.primary} onPress={() => (store.updateObjective(project.id, objective.id, { kpiIds: [...objective.kpiIds, k.id] }), changed())}>+ Add</AppText>} />
+                  <KpiRow key={k.id} kpi={k} right={<AppText variant="label" color={colors.primary} onPress={() => (store.updateObjective(project.id, objective.id, { kpiIds: [...objective.kpiIds, k.id] }))}>+ Add</AppText>} />
                 ))}
               </>
             )}
@@ -178,7 +173,7 @@ export default function StrategyMapScreen() {
                 onPress={() =>
                   Alert.alert('Delete objective?', objective.title, [
                     { text: 'Cancel', style: 'cancel' },
-                    { text: 'Delete', style: 'destructive', onPress: () => (store.deleteObjective(project.id, objective.id), setSelected(undefined), changed()) },
+                    { text: 'Delete', style: 'destructive', onPress: () => (store.deleteObjective(project.id, objective.id), setSelected(undefined)) },
                   ])
                 }
               />
@@ -205,7 +200,6 @@ export default function StrategyMapScreen() {
                 store.updateObjective(project.id, objective.id, { title: title.trim(), perspective });
               }
               setSheet(null);
-              changed();
             }}
           />
         }
@@ -238,7 +232,6 @@ export default function StrategyMapScreen() {
                 onPress={() => {
                   if (objective && !added) {
                     store.updateObjective(project.id, objective.id, { kpiIds: [...objective.kpiIds, k.id] });
-                    changed();
                   }
                 }}
                 right={<AppText variant="label">{added ? '✓ Added' : '+ Add'}</AppText>}

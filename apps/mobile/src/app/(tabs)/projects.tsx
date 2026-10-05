@@ -5,7 +5,6 @@ import { INDUSTRY_LABEL } from '@kpi/shared';
 import { EmptyState, Fab } from '@/components/ui/feedback';
 import { AppText, Badge, Card, Icon, Row } from '@/components/ui/primitives';
 import { Screen } from '@/components/ui/Screen';
-import { useAuth } from '@/state/auth';
 import { useProjects } from '@/state/projects';
 import { space } from '@/theme/tokens';
 import { useTheme } from '@/theme/ThemeProvider';
@@ -14,8 +13,6 @@ export default function Projects() {
   const { colors } = useTheme();
   const all = useProjects((s) => s.projects);
   const projects = useMemo(() => [...all].sort((a, b) => b.updatedAt.localeCompare(a.updatedAt)), [all]);
-  const dirty = useProjects((s) => s.dirty);
-  const signedIn = useAuth((s) => s.status === 'signedIn');
 
   return (
     <View style={{ flex: 1 }}>
@@ -35,7 +32,6 @@ export default function Projects() {
                         {[p.client, p.industry && INDUSTRY_LABEL[p.industry], p.horizon].filter(Boolean).join(' · ') || 'No details yet'}
                       </AppText>
                     </View>
-                    {signedIn && dirty.includes(p.id) && <Icon name="cloud-upload-outline" size={18} color={colors.textMuted} />}
                   </Row>
                   <Row style={{ marginTop: space.md }} wrap>
                     <Badge label={`${p.kpis.length} KPIs`} fg={colors.primary} bg={colors.primarySoft} />

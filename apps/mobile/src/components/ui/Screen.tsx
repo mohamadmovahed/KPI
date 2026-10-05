@@ -3,7 +3,6 @@ import { ScrollView, View, type ScrollViewProps } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { space } from '@/theme/tokens';
 import { useTheme } from '@/theme/ThemeProvider';
-import { OfflineBanner } from './feedback';
 import { AppText } from './primitives';
 
 /**
@@ -36,7 +35,6 @@ export function Screen({
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.bg, paddingTop: safeTop ? insets.top : 0 }}>
-      <OfflineBanner />
       {scroll ? (
         <ScrollView
           keyboardShouldPersistTaps="handled"

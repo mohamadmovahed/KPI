@@ -16,7 +16,6 @@ import { BottomSheet, EmptyState, Segmented } from '@/components/ui/feedback';
 import { AppText, Badge, Button, Card, Chip, Divider, IconButton, ListRow, Row, SectionHeader, TextField } from '@/components/ui/primitives';
 import { Screen } from '@/components/ui/Screen';
 import { useKb } from '@/services/knowledgeBase';
-import { syncProjects } from '@/services/sync';
 import { useChat } from '@/state/chat';
 import { useLibrary } from '@/state/library';
 import { useProject, useProjects } from '@/state/projects';
@@ -58,7 +57,6 @@ export default function ProjectWorkspace() {
 
   const health = mapHealth(project.map);
   const withTargets = project.kpis.filter((k) => k.target).length;
-  const changed = () => syncProjects();
 
   const openTarget = (kpiId: string) => {
     const pk = project.kpis.find((k) => k.kpiId === kpiId);
@@ -90,7 +88,7 @@ export default function ProjectWorkspace() {
                     onPress: () =>
                       Alert.alert('Delete project?', 'This cannot be undone.', [
                         { text: 'Cancel', style: 'cancel' },
-                        { text: 'Delete', style: 'destructive', onPress: () => (store.remove(project.id), changed(), router.back()) },
+                        { text: 'Delete', style: 'destructive', onPress: () => (store.remove(project.id), router.back()) },
                       ]),
                   },
                   { text: 'Cancel', style: 'cancel' },
@@ -162,7 +160,6 @@ export default function ProjectWorkspace() {
                   onPress={() => {
                     const themes = kb.index.search(`${project.name} ${project.strategyStatement ?? ''}`).interpretation.themes;
                     store.setMap(project.id, generateStrategyMap(kb, { themes, industry: project.industry }));
-                    changed();
                     router.push(`/project/${project.id}/map`);
                   }}
                 />
@@ -207,7 +204,7 @@ export default function ProjectWorkspace() {
             ) : (
               <Card>
                 {kpis.map((k) => (
-                  <KpiRow key={k.id} kpi={k} right={<IconButton icon="close" size={18} label={`Remove ${k.name}`} onPress={() => (store.removeKpi(project.id, k.id), changed())} />} />
+                  <KpiRow key={k.id} kpi={k} right={<IconButton icon="close" size={18} label={`Remove ${k.name}`} onPress={() => (store.removeKpi(project.id, k.id))} />} />
                 ))}
               </Card>
             )}
@@ -236,9 +233,9 @@ export default function ProjectWorkspace() {
           <View style={{ gap: space.md }}>
             <Row>
               <View style={{ flex: 1 }}>
-                <TextField placeholder="New initiative, e.g. Network modernisation" value={initiative} onChangeText={setInitiative} onSubmitEditing={() => initiative.trim() && (store.addInitiative(project.id, { title: initiative.trim(), status: 'planned' }), setInitiative(''), changed())} />
+                <TextField placeholder="New initiative, e.g. Network modernisation" value={initiative} onChangeText={setInitiative} onSubmitEditing={() => initiative.trim() && (store.addInitiative(project.id, { title: initiative.trim(), status: 'planned' }), setInitiative(''))} />
               </View>
-              <Button title="Add" disabled={!initiative.trim()} onPress={() => (store.addInitiative(project.id, { title: initiative.trim(), status: 'planned' }), setInitiative(''), changed())} />
+              <Button title="Add" disabled={!initiative.trim()} onPress={() => (store.addInitiative(project.id, { title: initiative.trim(), status: 'planned' }), setInitiative(''))} />
             </Row>
             {project.initiatives.map((i) => (
               <Card key={i.id}>
@@ -246,11 +243,11 @@ export default function ProjectWorkspace() {
                   <AppText variant="bodyStrong" style={{ flex: 1 }}>
                     {i.title}
                   </AppText>
-                  <IconButton icon="trash-outline" size={18} label="Delete initiative" onPress={() => (store.removeInitiative(project.id, i.id), changed())} />
+                  <IconButton icon="trash-outline" size={18} label="Delete initiative" onPress={() => (store.removeInitiative(project.id, i.id))} />
                 </Row>
                 <Row wrap gap={6}>
                   {STATUS.map((s) => (
-                    <Chip key={s} label={s} selected={i.status === s} onPress={() => (store.updateInitiative(project.id, i.id, { status: s }), changed())} />
+                    <Chip key={s} label={s} selected={i.status === s} onPress={() => (store.updateInitiative(project.id, i.id, { status: s }))} />
                   ))}
                 </Row>
               </Card>
@@ -260,7 +257,7 @@ export default function ProjectWorkspace() {
 
         {tab === 'diagnostics' && (
           <View style={{ gap: space.md }}>
-            <BalanceCard report={balance} actions={{ onAddToProject: (ids) => (store.addKpis(project.id, ids), changed()), onApplyMap: () => undefined }} />
+            <BalanceCard report={balance} actions={{ onAddToProject: (ids) => (store.addKpis(project.id, ids)), onApplyMap: () => undefined }} />
             <SectionHeader title="Investigate" />
             <Card>
               <ListRow icon="pulse-outline" title="Diagnose a KPI movement" subtitle="Driver tree, hypotheses and data to request" onPress={() => router.push('/diagnostics')} />
@@ -292,7 +289,6 @@ export default function ProjectWorkspace() {
             onPress={() => {
               if (editKpi) store.updateKpi(project.id, editKpi, { baseline: draft.baseline.trim() || undefined, target: draft.target.trim() || undefined, owner: draft.owner.trim() || undefined });
               setEditKpi(null);
-              changed();
             }}
           />
         }
@@ -344,8 +340,7 @@ function KpiPicker({ visible, onClose, projectId }: { visible: boolean; onClose:
             onPress={() => {
               if (!inProject.has(k.id)) {
                 store.addKpis(projectId, [k.id]);
-                syncProjects();
-              }
+                          }
             }}
             right={<AppText variant="label">{inProject.has(k.id) ? '✓ Added' : '+ Add'}</AppText>}
           />
@@ -364,7 +359,7 @@ function CollectionPicker({ visible, onClose, projectId }: { visible: boolean; o
     <BottomSheet visible={visible} onClose={onClose} title="Add from collection">
       {collections.length === 0 && <AppText muted>No collections yet. Save KPIs into collections from any KPI page.</AppText>}
       {collections.map((c) => (
-        <ListRow key={c.id} icon="albums-outline" title={c.name} subtitle={`${c.kpiIds.length} KPIs`} onPress={() => (addKpis(projectId, c.kpiIds), syncProjects(), onClose())} />
+        <ListRow key={c.id} icon="albums-outline" title={c.name} subtitle={`${c.kpiIds.length} KPIs`} onPress={() => (addKpis(projectId, c.kpiIds), onClose())} />
       ))}
     </BottomSheet>
   );
@@ -387,8 +382,7 @@ function EditInfoSheet({ visible, onClose, projectId }: { visible: boolean; onCl
           disabled={!form.name.trim()}
           onPress={() => {
             update(projectId, { name: form.name.trim(), client: form.client.trim() || undefined, horizon: form.horizon.trim() || undefined, strategyStatement: form.strategyStatement.trim() || undefined });
-            syncProjects();
-            onClose();
+                    onClose();
           }}
         />
       }

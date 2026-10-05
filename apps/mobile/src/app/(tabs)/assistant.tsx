@@ -5,10 +5,9 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { StrategyMap } from '@kpi/shared';
 import { AiCardView, type AiCardActions } from '@/components/ai/AiCards';
 import { AddToProjectSheet } from '@/components/kpi/sheets';
-import { BottomSheet, EmptyState, OfflineBanner } from '@/components/ui/feedback';
+import { BottomSheet, EmptyState } from '@/components/ui/feedback';
 import { AppText, Chip, Icon, IconButton, ListRow, Row } from '@/components/ui/primitives';
 import { voiceInput } from '@/services/voice';
-import { useAuth } from '@/state/auth';
 import { useChat } from '@/state/chat';
 import { useProjects } from '@/state/projects';
 import { useSettings } from '@/state/settings';
@@ -27,11 +26,10 @@ export default function Assistant() {
   const { colors } = useTheme();
   const insets = useSafeAreaInsets();
   const params = useLocalSearchParams<{ prompt?: string }>();
-  const { messages, pending, send, projectId, setProject, clear } = useChat();
+  const { messages, send, projectId, setProject, clear } = useChat();
   const projects = useProjects((s) => s.projects);
   const setMap = useProjects((s) => s.setMap);
   const defaultIndustry = useSettings((s) => s.defaultIndustry);
-  const status = useAuth((s) => s.status);
   const [text, setText] = useState('');
   const [scopeOpen, setScopeOpen] = useState(false);
   const [addIds, setAddIds] = useState<string[] | null>(null);
@@ -72,7 +70,6 @@ export default function Assistant() {
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.bg, paddingTop: insets.top }}>
-      <OfflineBanner />
       <Row style={{ paddingHorizontal: space.lg, paddingVertical: space.sm, justifyContent: 'space-between' }}>
         <View style={{ flex: 1 }}>
           <AppText variant="title" accessibilityRole="header">
@@ -116,14 +113,6 @@ export default function Assistant() {
               </View>
             ) : (
               <View style={{ gap: space.sm }}>
-                {item.source !== 'ai' && (
-                  <Row gap={6}>
-                    <Icon name={item.source === 'guest' ? 'person-circle-outline' : 'cloud-offline-outline'} size={14} color={colors.textMuted} />
-                    <AppText variant="caption" muted style={{ flex: 1 }}>
-                      {item.error ?? (item.source === 'guest' ? 'Offline engine — sign in for AI consultant answers.' : 'You’re offline — AI answers need an internet connection. This answer comes from the on-device engine.')}
-                    </AppText>
-                  </Row>
-                )}
                 <AppText variant="body">{item.text}</AppText>
                 {item.response?.cards.map((c, i) => <AiCardView key={i} card={c} actions={actions} />)}
                 {item.id === lastAssistant?.id && item.response?.followUps.length ? (
@@ -136,22 +125,13 @@ export default function Assistant() {
               </View>
             )
           }
-          ListFooterComponent={
-            pending ? (
-              <Row style={{ marginTop: space.md }}>
-                <Icon name="sparkles" size={16} color={colors.primary} />
-                <AppText muted>Thinking…</AppText>
-              </Row>
-            ) : null
-          }
         />
 
         <View style={{ flexDirection: 'row', alignItems: 'flex-end', gap: space.xs, padding: space.sm, borderTopWidth: 1, borderTopColor: colors.border, backgroundColor: colors.surface }}>
-          <IconButton icon="camera-outline" label="Analyze a photo or document" onPress={() => router.push('/scan')} />
           <TextInput
             value={text}
             onChangeText={setText}
-            placeholder={status === 'signedIn' ? 'What would you like to analyze?' : 'Ask the offline engine…'}
+            placeholder="What would you like to analyze?"
             placeholderTextColor={colors.textMuted}
             multiline
             accessibilityLabel="Message"

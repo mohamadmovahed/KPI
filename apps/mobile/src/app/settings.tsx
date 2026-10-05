@@ -1,25 +1,35 @@
 import Constants from 'expo-constants';
 import { useState } from 'react';
-import { Alert, Switch } from 'react-native';
+import { Alert } from 'react-native';
 import { INDUSTRIES } from '@kpi/shared';
-import { AppText, Button, Card, Chip, Divider, ListRow, Row, SectionHeader, TextField } from '@/components/ui/primitives';
+import { AppText, Card, Chip, Divider, ListRow, Row, SectionHeader, TextField } from '@/components/ui/primitives';
 import { Screen } from '@/components/ui/Screen';
-import { apiBaseUrl } from '@/services/api';
-import { syncKnowledgeBase, useKb } from '@/services/knowledgeBase';
+import { exportBackup, importBackup } from '@/services/backup';
+import { useKb } from '@/services/knowledgeBase';
 import { useChat } from '@/state/chat';
+import { useProjects } from '@/state/projects';
 import { useSettings } from '@/state/settings';
 import { space } from '@/theme/tokens';
-import { useTheme } from '@/theme/ThemeProvider';
 
 export default function Settings() {
-  const { colors } = useTheme();
   const settings = useSettings();
   const kbCount = useKb((s) => s.kb.kpis.length);
-  const version = useKb((s) => s.version);
-  const [url, setUrl] = useState(settings.apiUrl ?? '');
+  const projectCount = useProjects((s) => s.projects.length);
+  const [name, setName] = useState(settings.userName ?? '');
+
+  const run = async (fn: () => Promise<void>) => {
+    try {
+      await fn();
+    } catch (e) {
+      Alert.alert('Backup', e instanceof Error ? e.message : String(e));
+    }
+  };
 
   return (
     <Screen>
+      <SectionHeader title="Your name" />
+      <TextField placeholder="Shown in the Home greeting" value={name} onChangeText={setName} onEndEditing={() => settings.set({ userName: name.trim() || undefined })} returnKeyType="done" />
+
       <SectionHeader title="Appearance" />
       <Row>
         {(['system', 'light', 'dark'] as const).map((t) => (
@@ -35,37 +45,38 @@ export default function Settings() {
         ))}
       </Row>
 
-      <SectionHeader title="Notifications" />
+      <SectionHeader title="Backup & restore" />
       <Card>
+        <AppText variant="caption" muted>
+          Everything is stored only on this phone. Save a backup file to keep your {projectCount} project{projectCount === 1 ? '' : 's'}, collections and saved KPIs safe, or to move them to another phone.
+        </AppText>
+        <ListRow icon="download-outline" title="Export backup" subtitle="Save or send a .json file" onPress={() => run(exportBackup)} />
+        <Divider />
         <ListRow
-          icon="notifications-outline"
-          title="Project & benchmark updates"
-          subtitle="Quiet nudges such as KPIs without targets. Push delivery arrives with Phase 2."
-          right={<Switch value={settings.notifications} onValueChange={(v) => settings.set({ notifications: v })} trackColor={{ true: colors.primary }} />}
+          icon="cloud-upload-outline"
+          title="Restore from backup"
+          subtitle="Projects with the same id are replaced"
+          onPress={() =>
+            run(async () => {
+              const r = await importBackup();
+              if (r) Alert.alert('Restored', `${r.projects} project${r.projects === 1 ? '' : 's'} and ${r.collections} collection${r.collections === 1 ? '' : 's'} restored.`);
+            })
+          }
         />
       </Card>
 
-      <SectionHeader title="Knowledge base" />
-      <Card>
-        <AppText>
-          {kbCount} KPIs available offline{version ? ` · dataset ${version}` : ' · bundled dataset'}
-        </AppText>
-        <Button small variant="ghost" title="Check for updates" icon="refresh" style={{ marginTop: space.sm }} onPress={async () => (await syncKnowledgeBase(), Alert.alert('Knowledge base', 'Up to date.'))} />
-      </Card>
-
-      <SectionHeader title="Server" />
-      <Card>
-        <TextField label="API URL" value={url} onChangeText={setUrl} autoCapitalize="none" autoCorrect={false} keyboardType="url" placeholder={apiBaseUrl()} />
-        <Button small title="Save" style={{ marginTop: space.sm }} onPress={() => (settings.set({ apiUrl: url.trim() || undefined }), Alert.alert('Saved', `Using ${apiBaseUrl()}`))} />
-      </Card>
-
-      <SectionHeader title="Privacy & security" />
+      <SectionHeader title="Privacy" />
       <Card>
         <AppText variant="caption" muted>
-          Sign-in tokens are stored in the device keychain/keystore. Projects are stored on this device and, when signed in, synced over HTTPS to your organisation’s workspace with project-level permissions. Prompts are not written to logs.
+          The app works fully offline. It has no account, sends no data anywhere and contains no analytics. The KPI knowledge base ({kbCount} KPIs) and the assistant run on the device.
         </AppText>
         <Divider />
-        <ListRow icon="trash-outline" danger title="Clear AI conversation history" onPress={() => Alert.alert('Clear history?', undefined, [{ text: 'Cancel', style: 'cancel' }, { text: 'Clear', style: 'destructive', onPress: () => useChat.getState().clear() }])} />
+        <ListRow
+          icon="trash-outline"
+          danger
+          title="Clear assistant history"
+          onPress={() => Alert.alert('Clear history?', undefined, [{ text: 'Cancel', style: 'cancel' }, { text: 'Clear', style: 'destructive', onPress: () => useChat.getState().clear() }])}
+        />
       </Card>
 
       <AppText variant="caption" muted style={{ textAlign: 'center', marginTop: space.xl }}>

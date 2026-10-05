@@ -7,7 +7,7 @@ import {
   interpretQuery,
   KnowledgeBase,
   KPIS,
-  llmResponseSchema,
+  backupSchema,
   mapHealth,
   projectSchema,
   qualityScore,
@@ -234,9 +234,11 @@ describe('strategy map & summary', () => {
 });
 
 describe('validation', () => {
-  it('accepts engine-shaped LLM responses and rejects unknown cards', () => {
-    expect(llmResponseSchema.safeParse({ summary: 'x', cards: [{ kind: 'insight', title: 't', body: 'b' }], followUps: [] }).success).toBe(true);
-    expect(llmResponseSchema.safeParse({ summary: 'x', cards: [{ kind: 'html', body: '<script>' }], followUps: [] }).success).toBe(false);
+  it('accepts a valid backup and rejects foreign files', () => {
+    const now = new Date().toISOString();
+    const ok = backupSchema.safeParse({ app: 'kpi-consultant', version: 1, exportedAt: now, projects: [{ id: 'p', name: 'X', kpis: [], map: { objectives: [], links: [] }, initiatives: [], createdAt: now, updatedAt: now }] });
+    expect(ok.success).toBe(true);
+    expect(backupSchema.safeParse({ app: 'other', version: 1, exportedAt: now, projects: [] }).success).toBe(false);
   });
 });
 

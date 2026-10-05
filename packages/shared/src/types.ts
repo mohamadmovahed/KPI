@@ -311,8 +311,8 @@ export interface AiResponse {
   summary: string;
   cards: AiCard[];
   followUps: string[];
-  /** 'llm' when a large language model generated/refined the response, 'engine' for deterministic. */
-  engine: 'llm' | 'engine';
+  /** Answers are produced by the deterministic on-device engine. */
+  engine: 'engine';
   createdAt: string;
 }
 
@@ -330,24 +330,7 @@ export interface ExecutiveSummary {
   sections: { heading: string; bullets: string[] }[];
 }
 
-// ---------- Platform ----------
-
-export type Role = 'admin' | 'consultant' | 'viewer';
-export type ProjectPermission = 'owner' | 'editor' | 'viewer';
-
-export interface PublicUser {
-  id: string;
-  email: string;
-  name: string;
-  role: Role;
-  orgId: string;
-}
-
-export interface AuthTokens {
-  accessToken: string;
-  refreshToken: string;
-  expiresIn: number;
-}
+// ---------- Notifications ----------
 
 export interface AppNotification {
   id: string;

@@ -1,11 +1,9 @@
 import { z } from 'zod';
 
-// Runtime schemas for untrusted input: client payloads on the API and LLM output on the server.
+// Runtime schemas for untrusted input, e.g. backup files restored into the app.
 
 const perspective = z.enum(['financial', 'customer', 'internal', 'learning']);
-const indicator = z.enum(['leading', 'lagging']);
 const industry = z.enum(['cross', 'telecom', 'banking', 'insurance', 'manufacturing', 'retail', 'saas', 'healthcare', 'energy', 'logistics', 'public', 'holding']);
-const severity = z.enum(['info', 'warning', 'critical', 'positive']);
 const id = z.string().min(1).max(80);
 const text = (max: number) => z.string().max(max);
 
@@ -60,23 +58,14 @@ export const collectionSchema = z.object({
   updatedAt: z.string(),
 });
 
-const driverNode: z.ZodType<{ id: string; label: string; kpiId?: string; children: unknown[] }> = z.lazy(() =>
-  z.object({ id: z.string(), label: z.string(), kpiId: z.string().optional(), children: z.array(driverNode) }),
-);
-
-/** Cards an LLM is allowed to emit. Structural cards (balance, map) are only produced by the engine. */
-export const llmCardSchema = z.discriminatedUnion('kind', [
-  z.object({ kind: z.literal('recommendation'), title: z.string(), kpiId: z.string(), why: z.string(), indicator, complementIds: z.array(z.string()).max(5) }),
-  z.object({ kind: z.literal('insight'), title: z.string(), body: z.string(), severity: severity.optional() }),
-  z.object({ kind: z.literal('checklist'), title: z.string(), items: z.array(z.string()).max(12) }),
-  z.object({ kind: z.literal('kpi-list'), title: z.string(), kpiIds: z.array(z.string()).max(12), note: z.string().optional() }),
-  z.object({ kind: z.literal('driver-tree'), title: z.string(), tree: driverNode }),
-]);
-
-export const llmResponseSchema = z.object({
-  summary: z.string(),
-  cards: z.array(llmCardSchema).max(10),
-  followUps: z.array(z.string()).max(4),
-});
-
 export type ProjectInput = z.infer<typeof projectSchema>;
+
+/** Local backup file written and read by the mobile app (Settings → Backup). */
+export const backupSchema = z.object({
+  app: z.literal('kpi-consultant'),
+  version: z.literal(1),
+  exportedAt: z.string(),
+  projects: z.array(projectSchema),
+  collections: z.array(collectionSchema).default([]),
+  savedIds: z.array(z.string().max(80)).max(1000).default([]),
+});

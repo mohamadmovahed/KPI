@@ -7,7 +7,6 @@ import { BottomSheet } from '@/components/ui/feedback';
 import { Button, Divider, ListRow, TextField } from '@/components/ui/primitives';
 import { useLibrary } from '@/state/library';
 import { useProjects } from '@/state/projects';
-import { syncProjects } from '@/services/sync';
 
 export function AddToProjectSheet({ kpiIds, visible, onClose }: { kpiIds: string[]; visible: boolean; onClose: () => void }) {
   const projects = useProjects((s) => s.projects);
@@ -16,7 +15,6 @@ export function AddToProjectSheet({ kpiIds, visible, onClose }: { kpiIds: string
   const add = (projectId: string, name: string) => {
     const n = addKpis(projectId, kpiIds);
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => undefined);
-    syncProjects();
     onClose();
     Alert.alert(n ? 'Added' : 'Already in project', n ? `${n} KPI${n > 1 ? 's' : ''} added to ${name}.` : `These KPIs are already in ${name}.`, [
       { text: 'OK' },

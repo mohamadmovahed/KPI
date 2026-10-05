@@ -19,7 +19,7 @@ import {
 } from '@kpi/shared';
 import { KpiCard } from '@/components/kpi/KpiCard';
 import { AddToProjectSheet } from '@/components/kpi/sheets';
-import { BottomSheet, EmptyState, OfflineBanner } from '@/components/ui/feedback';
+import { BottomSheet, EmptyState } from '@/components/ui/feedback';
 import { AppText, Button, Chip, Icon, Row, SearchBar } from '@/components/ui/primitives';
 import { useKb } from '@/services/knowledgeBase';
 import { useLibrary } from '@/state/library';
@@ -57,7 +57,7 @@ export default function Library() {
   }, [params.q]);
   useEffect(() => setLimit(PAGE), [deferred, filters]);
 
-  // Local search over the on-device knowledge base: instant, works offline.
+  // Search runs over the knowledge base bundled in the app.
   const result = useMemo(() => kb.index.search(deferred, { filters, limit }), [kb, deferred, filters, limit]);
   const activeCount = Object.values(filters).reduce((n, v) => n + (v?.length ?? 0), 0);
   const interp = result.interpretation;
@@ -82,7 +82,6 @@ export default function Library() {
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.bg, paddingTop: insets.top }}>
-      <OfflineBanner />
       <View style={{ paddingHorizontal: space.lg, paddingTop: space.md, gap: space.sm }}>
         <AppText variant="title" accessibilityRole="header">
           KPI Library

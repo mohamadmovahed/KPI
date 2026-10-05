@@ -17,11 +17,6 @@ import { persistStorage } from '@/lib/storage';
 
 interface ProjectsState {
   projects: Project[];
-  /** Ids changed locally since the last successful sync. */
-  dirty: string[];
-  /** Ids deleted locally, pending server deletion. */
-  deleted: string[];
-  lastSyncAt?: string;
 
   create: (input: { name: string; client?: string; industry?: IndustryId; horizon?: string; strategyStatement?: string }) => Project;
   update: (id: string, patch: Partial<Omit<Project, 'id' | 'createdAt'>>) => void;
@@ -44,9 +39,8 @@ interface ProjectsState {
   updateInitiative: (id: string, initiativeId: string, patch: Partial<Omit<Initiative, 'id'>>) => void;
   removeInitiative: (id: string, initiativeId: string) => void;
 
-  // Sync plumbing
-  replaceFromServer: (p: Project) => void;
-  markSynced: (ids: string[], deletedIds: string[]) => void;
+  /** Restore from a backup file: projects with the same id are replaced, others added. */
+  importProjects: (projects: Project[]) => number;
 }
 
 const now = () => new Date().toISOString();
@@ -55,16 +49,11 @@ export const useProjects = create<ProjectsState>()(
   persist(
     (set, get) => {
       const mutate = (id: string, fn: (p: Project) => Project) =>
-        set((s) => ({
-          projects: s.projects.map((p) => (p.id === id ? { ...fn(p), updatedAt: now() } : p)),
-          dirty: s.dirty.includes(id) ? s.dirty : [...s.dirty, id],
-        }));
+        set((s) => ({ projects: s.projects.map((p) => (p.id === id ? { ...fn(p), updatedAt: now() } : p)) }));
       const mutateMap = (id: string, fn: (m: StrategyMap) => StrategyMap) => mutate(id, (p) => ({ ...p, map: fn(p.map) }));
 
       return {
         projects: [],
-        dirty: [],
-        deleted: [],
 
         create: (input) => {
           const t = now();
@@ -81,12 +70,11 @@ export const useProjects = create<ProjectsState>()(
             createdAt: t,
             updatedAt: t,
           };
-          set((s) => ({ projects: [p, ...s.projects], dirty: [...s.dirty, p.id] }));
+          set((s) => ({ projects: [p, ...s.projects] }));
           return p;
         },
         update: (id, patch) => mutate(id, (p) => ({ ...p, ...patch })),
-        remove: (id) =>
-          set((s) => ({ projects: s.projects.filter((p) => p.id !== id), dirty: s.dirty.filter((d) => d !== id), deleted: [...s.deleted, id] })),
+        remove: (id) => set((s) => ({ projects: s.projects.filter((p) => p.id !== id) })),
 
         addKpis: (id, kpiIds) => {
           const p = get().projects.find((x) => x.id === id);
@@ -148,13 +136,11 @@ export const useProjects = create<ProjectsState>()(
         updateInitiative: (id, iid, patch) => mutate(id, (p) => ({ ...p, initiatives: p.initiatives.map((i) => (i.id === iid ? { ...i, ...patch } : i)) })),
         removeInitiative: (id, iid) => mutate(id, (p) => ({ ...p, initiatives: p.initiatives.filter((i) => i.id !== iid) })),
 
-        replaceFromServer: (p) =>
-          set((s) => ({
-            projects: s.projects.some((x) => x.id === p.id) ? s.projects.map((x) => (x.id === p.id ? p : x)) : [p, ...s.projects],
-            dirty: s.dirty.filter((d) => d !== p.id),
-          })),
-        markSynced: (ids, deletedIds) =>
-          set((s) => ({ dirty: s.dirty.filter((d) => !ids.includes(d)), deleted: s.deleted.filter((d) => !deletedIds.includes(d)), lastSyncAt: now() })),
+        importProjects: (incoming) => {
+          const ids = new Set(incoming.map((p) => p.id));
+          set((s) => ({ projects: [...incoming, ...s.projects.filter((p) => !ids.has(p.id))] }));
+          return incoming.length;
+        },
       };
     },
     { name: 'projects', storage: persistStorage },

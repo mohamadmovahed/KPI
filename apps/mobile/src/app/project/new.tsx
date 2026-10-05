@@ -3,7 +3,6 @@ import { useState } from 'react';
 import { INDUSTRIES, type IndustryId } from '@kpi/shared';
 import { AppText, Button, Chip, Row, TextField } from '@/components/ui/primitives';
 import { Screen } from '@/components/ui/Screen';
-import { syncProjects } from '@/services/sync';
 import { useProjects } from '@/state/projects';
 import { useSettings } from '@/state/settings';
 import { space } from '@/theme/tokens';
@@ -22,7 +21,6 @@ export default function NewProject() {
   const submit = () => {
     const p = create({ name, client, industry, horizon, strategyStatement: ambition });
     if (kpiIds) addKpis(p.id, kpiIds.split(',').filter(Boolean));
-    syncProjects();
     router.replace(`/project/${p.id}`);
   };
 

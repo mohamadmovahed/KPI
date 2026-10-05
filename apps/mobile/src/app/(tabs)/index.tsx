@@ -3,11 +3,10 @@ import { useMemo, useState } from 'react';
 import { Pressable, ScrollView, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { INDUSTRY_LABEL } from '@kpi/shared';
-import { OfflineBanner } from '@/components/ui/feedback';
 import { AppText, Card, Icon, Row, SectionHeader, type IconName } from '@/components/ui/primitives';
 import { useKb } from '@/services/knowledgeBase';
 import { projectInsights } from '@/services/insights';
-import { useAuth } from '@/state/auth';
+import { useSettings } from '@/state/settings';
 import { useChat } from '@/state/chat';
 import { useLibrary } from '@/state/library';
 import { useProjects } from '@/state/projects';
@@ -20,7 +19,7 @@ const QUICK_ACTIONS: { icon: IconName; label: string; go: () => void }[] = [
   { icon: 'pulse-outline', label: 'Analyze a KPI', go: () => router.push('/diagnostics') },
   { icon: 'git-network-outline', label: 'Build a Strategy Map', go: () => router.push('/projects') },
   { icon: 'medkit-outline', label: 'Diagnose a Problem', go: () => router.push({ pathname: '/assistant', params: { prompt: 'Our ' } }) },
-  { icon: 'scan-outline', label: 'Scan a Document', go: () => router.push('/scan') },
+  { icon: 'bookmark-outline', label: 'Saved KPIs', go: () => router.push('/saved') },
 ];
 
 const EXAMPLES = ['KPIs for improving customer retention', 'Why could EBITDA margin decline?', 'Build a KPI set for procurement'];
@@ -33,7 +32,7 @@ function greeting() {
 export default function Home() {
   const { colors } = useTheme();
   const insets = useSafeAreaInsets();
-  const user = useAuth((s) => s.user);
+  const userName = useSettings((s) => s.userName);
   const kb = useKb((s) => s.kb);
   const projects = useProjects((s) => s.projects);
   const recentIds = useLibrary((s) => s.recentIds);
@@ -52,11 +51,10 @@ export default function Home() {
   return (
     <View style={{ flex: 1, backgroundColor: colors.bg }}>
       <View style={{ height: insets.top, backgroundColor: colors.bg }} />
-      <OfflineBanner />
       <ScrollView contentContainerStyle={{ padding: space.lg, paddingBottom: space.xxxl * 2 }} keyboardShouldPersistTaps="handled">
         <AppText variant="display" accessibilityRole="header">
           {greeting()}
-          {user ? `, ${user.name.split(' ')[0]}` : ''}
+          {userName ? `, ${userName.split(' ')[0]}` : ''}
         </AppText>
 
         {/* AI entry point */}
