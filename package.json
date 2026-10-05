@@ -1,0 +1,19 @@
+{
+  "name": "kpi-strategy-consultant",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Mobile-first KPI intelligence and strategy consulting platform (iOS/Android) with AI backend.",
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "scripts": {
+    "dev:server": "npm run dev -w @kpi/server",
+    "dev:mobile": "npm run start -w @kpi/mobile",
+    "test": "npm run test -w @kpi/shared && npm run test -w @kpi/server",
+    "typecheck": "npm run typecheck -w @kpi/shared && npm run typecheck -w @kpi/server && npm run typecheck -w @kpi/mobile"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
