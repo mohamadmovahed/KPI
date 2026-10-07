@@ -46,7 +46,8 @@ removed in `app.json`. `INTERNET` stays in the manifest only because React Nativ
 to load code from the dev server; the app makes no network requests.
 
 ## Extending
-- **Add KPIs** in `packages/shared/src/data/kpis.ts`. Relationships only need declaring on one side.
-  The tests check every reference.
+- **Add KPIs.** Core KPIs (fully documented) go in `packages/shared/src/data/kpis.ts`; concise library
+  entries go in `packages/shared/src/data/library/` using the compact `lib()` format. Relationships
+  only need declaring on one side, and the tests check every reference.
 - **Voice input:** `services/voice.ts` defines the interface; an on-device recogniser can be plugged in.
 - **Notifications:** `services/insights.ts` computes project-health nudges, which are shown on Home.

@@ -4,9 +4,9 @@ Legend: ✅ built · 🟡 partly built · ⬜ not started. Everything below runs
 
 | Capability | Status | Notes |
 |---|---|---|
-| Android app, no server, no account | ✅ | Expo SDK 57; APK built by GitHub Actions |
+| Android app, no server, no account | ✅ | Expo SDK 57; APK built by GitHub Actions and attached to GitHub Releases |
 | Home dashboard | ✅ | Assistant prompt, quick actions, needs-attention items, recent projects and KPIs |
-| KPI library, natural-language search, filters | ✅ | Filters open in bottom sheets |
+| KPI library, natural-language search, filters | ✅ | 271 KPIs (60 core + 211 library entries); filters open in bottom sheets |
 | KPI detail, comparison, quality score | ✅ | |
 | Industry/function hierarchy, leading/lagging | ✅ | |
 | KPI relationships and graph | ✅ | Layered neighbourhood with pinch and pan |
@@ -27,7 +27,7 @@ Legend: ✅ built · 🟡 partly built · ⬜ not started. Everything below runs
 | PowerPoint/Excel export | ⬜ | |
 
 ## Next steps
-1. Grow the dataset beyond the current 60 KPIs.
+1. Promote frequently used library entries to fully documented core KPIs (drivers, risks, data).
 2. Add actuals over time per KPI, with simple trend charts.
 3. Add on-device speech recognition.
 4. Set up a release keystore for Google Play distribution.

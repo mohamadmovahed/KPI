@@ -3,7 +3,7 @@ import { z } from 'zod';
 // Runtime schemas for untrusted input, e.g. backup files restored into the app.
 
 const perspective = z.enum(['financial', 'customer', 'internal', 'learning']);
-const industry = z.enum(['cross', 'telecom', 'banking', 'insurance', 'manufacturing', 'retail', 'saas', 'healthcare', 'energy', 'logistics', 'public', 'holding']);
+const industry = z.enum(['cross', 'telecom', 'banking', 'insurance', 'manufacturing', 'retail', 'saas', 'healthcare', 'energy', 'logistics', 'public', 'holding', 'hospitality', 'aviation', 'education', 'construction', 'real-estate', 'pharma', 'media', 'nonprofit']);
 const id = z.string().min(1).max(80);
 const text = (max: number) => z.string().max(max);
 

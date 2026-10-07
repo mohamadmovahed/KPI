@@ -20,6 +20,14 @@ export const INDUSTRIES: TaxonomyEntry<IndustryId>[] = [
   { id: 'logistics', label: 'Logistics', cues: ['logistics', 'transport', 'shipping', 'freight', 'warehouse', '3pl'] },
   { id: 'public', label: 'Public sector', cues: ['public sector', 'government', 'ministry', 'municipal', 'agency'] },
   { id: 'holding', label: 'Holding / Conglomerate', cues: ['holding', 'conglomerate', 'group', 'portfolio company', 'portfolio'] },
+  { id: 'hospitality', label: 'Hospitality', cues: ['hotel', 'hotels', 'hospitality', 'resort', 'restaurant', 'restaurants'] },
+  { id: 'aviation', label: 'Airlines & Aviation', cues: ['airline', 'airlines', 'aviation', 'airport', 'flight', 'flights'] },
+  { id: 'education', label: 'Education', cues: ['education', 'school', 'schools', 'university', 'universities', 'college', 'students'] },
+  { id: 'construction', label: 'Construction & Engineering', cues: ['construction', 'contractor', 'engineering projects', 'infrastructure projects', 'epc'] },
+  { id: 'real-estate', label: 'Real Estate', cues: ['real estate', 'property', 'properties', 'landlord', 'reit', 'facilities'] },
+  { id: 'pharma', label: 'Pharma & Life Sciences', cues: ['pharma', 'pharmaceutical', 'biotech', 'life sciences', 'clinical trial', 'drug'] },
+  { id: 'media', label: 'Media & Entertainment', cues: ['media', 'publishing', 'streaming', 'broadcaster', 'entertainment', 'newspaper'] },
+  { id: 'nonprofit', label: 'Non-profit', cues: ['nonprofit', 'non-profit', 'charity', 'ngo', 'foundation', 'donors'] },
 ];
 
 export const FUNCTIONS: TaxonomyEntry<FunctionId>[] = [
@@ -35,6 +43,7 @@ export const FUNCTIONS: TaxonomyEntry<FunctionId>[] = [
   { id: 'it', label: 'IT & Digital', cues: ['it', 'digital', 'technology', 'systems', 'software delivery'] },
   { id: 'risk', label: 'Risk & Compliance', cues: ['risk', 'compliance', 'credit risk', 'safety', 'audit'] },
   { id: 'rnd', label: 'R&D / Innovation', cues: ['r&d', 'innovation', 'product development', 'new product', 'research'] },
+  { id: 'sustainability', label: 'Sustainability & ESG', cues: ['sustainability', 'esg', 'environmental', 'climate', 'carbon', 'emissions'] },
 ];
 
 export const LEVELS: TaxonomyEntry<KpiLevel>[] = [
@@ -103,4 +112,6 @@ export const THEMES: Record<string, string[]> = {
   supplier: ['supplier', 'suppliers', 'vendor', 'vendors', 'sourcing', 'procurement'],
   delivery: ['delivery', 'on time', 'on-time', 'otif', 'service level', 'fulfilment', 'fulfillment'],
   execution: ['execution', 'initiatives', 'projects', 'transformation', 'strategy execution'],
+  sustainability: ['sustainability', 'esg', 'carbon', 'emissions', 'climate', 'environmental', 'green', 'net zero', 'waste', 'water'],
+  security: ['security', 'cyber', 'cybersecurity', 'breach', 'vulnerability', 'phishing'],
 };

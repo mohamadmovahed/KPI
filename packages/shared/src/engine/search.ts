@@ -166,7 +166,7 @@ function scoreDoc(d: IndexedKpi, q: string, terms: { s: string; w: number }[], i
     if (d.nameNorm === q || d.aliasNorms.includes(q)) {
       score += 60;
       matched.push('exact name');
-    } else if (d.nameNorm.includes(q) || d.aliasNorms.some((a) => a.length >= 3 && q.includes(a))) {
+    } else if (d.nameNorm.includes(q) || d.aliasNorms.some((a) => a.length >= 3 && ` ${q} `.includes(` ${a} `))) {
       score += 30;
       matched.push('name');
     }
@@ -194,11 +194,14 @@ function scoreDoc(d: IndexedKpi, q: string, terms: { s: string; w: number }[], i
     }
   }
 
+  // With no industry in the query, prefer cross-industry KPIs over sector-specific ones.
+  if (!it.industries.length && !d.kpi.industries.includes('cross')) score -= 3;
   if (it.industries.length) {
     if (it.industries.some((i) => d.kpi.industries.includes(i))) {
-      score += 6;
+      // An industry named in the query is strong intent; it outweighs a generic name match.
+      score += 10;
       matched.push('industry');
-    } else if (d.kpi.industries.includes('cross')) score += 4;
+    } else if (d.kpi.industries.includes('cross')) score += 2;
     else score -= 6;
   }
   if (it.functions.length) {

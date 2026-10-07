@@ -5,6 +5,9 @@ import {
   diagnose,
   generateStrategyMap,
   interpretQuery,
+  CORE_KPIS,
+  INDUSTRIES,
+  FUNCTIONS,
   KnowledgeBase,
   KPIS,
   backupSchema,
@@ -42,6 +45,41 @@ describe('dataset integrity', () => {
       expect(KPIS.some((k) => k.perspective === p)).toBe(true);
     }
     expect(KPIS.filter((k) => k.indicator === 'leading').length).toBeGreaterThan(15);
+  });
+});
+
+describe('library entries', () => {
+  const library = KPIS.filter((k) => k.tier === 'library');
+
+  it('adds a broad library on top of the core set', () => {
+    expect(CORE_KPIS.length).toBe(60);
+    expect(library.length).toBeGreaterThanOrEqual(200);
+  });
+
+  it('every library entry is complete enough to be useful', () => {
+    for (const k of library) {
+      expect(k.shortDefinition.length, k.id).toBeGreaterThan(20);
+      expect(k.purpose.length, k.id).toBeGreaterThan(20);
+      expect(k.formula.length, k.id).toBeGreaterThan(5);
+      expect(k.levels.every(Boolean), k.id).toBe(true);
+      expect(k.themes.length, k.id).toBeGreaterThan(0);
+    }
+  });
+
+  it('covers every industry and function', () => {
+    for (const i of INDUSTRIES.filter((x) => x.id !== 'cross')) expect(KPIS.some((k) => k.industries.includes(i.id)), i.id).toBe(true);
+    for (const f of FUNCTIONS) expect(KPIS.some((k) => k.functions.includes(f.id)), f.id).toBe(true);
+  });
+
+  it('finds library KPIs by natural language', () => {
+    expect(kb.index.search('RevPAR').hits[0].kpi.id).toBe('revpar');
+    expect(kb.index.search('hotel KPIs').hits.slice(0, 5).map((h) => h.kpi.id)).toContain('revpar');
+    expect(kb.index.search('airline punctuality').hits.slice(0, 5).map((h) => h.kpi.id)).toContain('on-time-performance');
+    expect(kb.index.search('carbon emissions').hits.slice(0, 3).map((h) => h.kpi.id)).toContain('scope12-emissions');
+    expect(kb.index.search('combined ratio insurance').hits[0].kpi.id).toBe('combined-ratio');
+    expect(kb.index.search('DORA deployment frequency').hits[0].kpi.id).toBe('deployment-frequency');
+    // Short aliases must match whole words only ("SPI" must not match inside "hospital").
+    expect(kb.index.search('hospital quality').hits[0].kpi.industries).toContain('healthcare');
   });
 });
 
@@ -90,7 +128,7 @@ describe('query interpretation & search', () => {
 
 describe('quality score', () => {
   it('scores well-documented KPIs between 60 and 100', () => {
-    for (const k of KPIS) {
+    for (const k of CORE_KPIS) {
       const q = qualityScore(k);
       expect(q.total).toBeGreaterThanOrEqual(45);
       expect(q.total).toBeLessThanOrEqual(100);

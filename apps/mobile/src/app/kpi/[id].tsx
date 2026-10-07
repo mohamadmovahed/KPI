@@ -87,6 +87,11 @@ export default function KpiDetail() {
             {kpi.name}
           </AppText>
           <KpiBadges kpi={kpi} />
+          {kpi.tier === 'library' && (
+            <AppText variant="caption" muted>
+              Library entry: definition, formula and relationships. Drivers, risks and data requirements are fully documented for the core KPIs.
+            </AppText>
+          )}
           <AppText style={{ marginTop: space.xs }}>{kpi.shortDefinition}</AppText>
         </View>
 
@@ -168,7 +173,7 @@ export default function KpiDetail() {
           </Accordion>
 
           <Accordion title="Drivers" icon="options-outline" badge={String(kpi.drivers.length)}>
-            <Bullets items={kpi.drivers} />
+            {kpi.drivers.length ? <Bullets items={kpi.drivers} /> : <AppText muted>Not documented for this library entry yet.</AppText>}
           </Accordion>
 
           <Accordion title="Trade-offs" icon="swap-horizontal-outline" badge={String(kpi.tradeoffs.length)}>
@@ -186,7 +191,7 @@ export default function KpiDetail() {
             <AppText variant="label" muted>
               REQUIRED DATA
             </AppText>
-            <Bullets items={kpi.dataRequirements} />
+            {kpi.dataRequirements.length ? <Bullets items={kpi.dataRequirements} /> : <AppText muted>The inputs named in the formula: {kpi.formula}</AppText>}
             {kpi.dataSources.length > 0 && (
               <>
                 <AppText variant="label" muted style={{ marginTop: space.sm }}>

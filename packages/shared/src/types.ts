@@ -21,7 +21,15 @@ export type IndustryId =
   | 'energy'
   | 'logistics'
   | 'public'
-  | 'holding';
+  | 'holding'
+  | 'hospitality'
+  | 'aviation'
+  | 'education'
+  | 'construction'
+  | 'real-estate'
+  | 'pharma'
+  | 'media'
+  | 'nonprofit';
 
 export type FunctionId =
   | 'executive'
@@ -35,7 +43,8 @@ export type FunctionId =
   | 'hr'
   | 'it'
   | 'risk'
-  | 'rnd';
+  | 'rnd'
+  | 'sustainability';
 
 export interface Benchmark {
   /** Industry the benchmark applies to; omitted = cross-industry. */
@@ -59,6 +68,11 @@ export interface TradeOff {
 
 export interface Kpi {
   id: string;
+  /**
+   * 'core' = fully documented (drivers, risks, data, sources). 'library' = concise reference entry
+   * (definition, formula, purpose, classification). Defaults to 'core'.
+   */
+  tier?: 'core' | 'library';
   name: string;
   aliases?: string[];
   shortDefinition: string;

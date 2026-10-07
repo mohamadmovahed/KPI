@@ -1,4 +1,6 @@
 import type { Kpi } from '../types';
+import { FUNCTION_KPIS } from './library/functions';
+import { INDUSTRY_KPIS } from './library/industries';
 
 /**
  * Initial curated KPI dataset (Phase 1).
@@ -18,6 +20,7 @@ type KpiInput = Omit<
   Partial<Pick<Kpi, 'aliases' | 'tradeoffs' | 'gamingRisks' | 'dataSources' | 'benchmarks' | 'leadingIds' | 'laggingIds' | 'frequency' | 'sourceIds'>>;
 
 const k = (input: KpiInput): Kpi => ({
+  tier: 'core',
   aliases: [],
   tradeoffs: [],
   gamingRisks: [],
@@ -32,7 +35,8 @@ const k = (input: KpiInput): Kpi => ({
 
 const ILLUSTRATIVE = 'Indicative orientation range; validate against a sourced benchmark before client use.';
 
-export const KPIS: Kpi[] = [
+/** Fully documented core KPIs. */
+export const CORE_KPIS: Kpi[] = [
   // ───────────────────────────── FINANCIAL ─────────────────────────────
   k({
     id: 'roic',
@@ -1606,5 +1610,8 @@ export const KPIS: Kpi[] = [
     sourceIds: ['kaplan-norton-2004'],
   }),
 ];
+
+/** Core KPIs plus concise library entries across functions and industries. */
+export const KPIS: Kpi[] = [...CORE_KPIS, ...FUNCTION_KPIS, ...INDUSTRY_KPIS];
 
 export const KPI_BY_ID: Record<string, Kpi> = Object.fromEntries(KPIS.map((kpi) => [kpi.id, kpi]));

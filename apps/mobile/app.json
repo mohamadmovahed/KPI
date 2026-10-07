@@ -3,7 +3,7 @@
     "name": "KPI Consultant",
     "slug": "kpi-consultant",
     "scheme": "kpiconsultant",
-    "version": "0.1.0",
+    "version": "0.2.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "automatic",
@@ -24,7 +24,7 @@
         "android.permission.READ_EXTERNAL_STORAGE",
         "android.permission.WRITE_EXTERNAL_STORAGE"
       ],
-      "versionCode": 1
+      "versionCode": 2
     },
     "plugins": [
       "expo-router",

@@ -1,6 +1,6 @@
 export * from './types';
 export * from './taxonomy';
-export { KPIS, KPI_BY_ID } from './data/kpis';
+export { CORE_KPIS, KPIS, KPI_BY_ID } from './data/kpis';
 export { SOURCES, SOURCE_BY_ID } from './data/sources';
 export * from './engine/text';
 export * from './engine/search';

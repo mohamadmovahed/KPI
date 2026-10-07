@@ -1,6 +1,6 @@
 {
   "name": "@kpi/shared",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "description": "Shared domain model, KPI knowledge base and deterministic strategy/KPI reasoning engines used by the mobile app and the API.",
   "main": "src/index.ts",

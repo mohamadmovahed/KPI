@@ -19,6 +19,10 @@ assistant, projects and reports all run and are stored on the phone.
 
 ## Get the APK
 
+**Releases (easiest).** Open the repository's **Releases** page and download the
+`kpi-consultant-vX.Y.Z.apk` attached to the latest release. Each release lists what changed
+(see [CHANGELOG.md](CHANGELOG.md)).
+
 **Option A: GitHub Actions (no setup).** Every push that changes the app runs
 [`.github/workflows/android-apk.yml`](.github/workflows/android-apk.yml). Open the repository's
 **Actions** tab, select the latest **Build Android APK** run, and download **kpi-consultant-apk**
@@ -43,7 +47,9 @@ cd android && ./gradlew assembleRelease
 
 ## What works offline
 
-- **KPI Library:** 60 curated KPIs with natural-language search ("KPIs for customer loyalty in
+- **KPI Library:** 271 KPIs: 60 fully documented core KPIs (drivers, trade-offs, gaming risks, data
+  requirements, benchmarks, sources) plus 211 library entries across business functions and 19
+  industries. Natural-language search ("KPIs for customer loyalty in
   telecom") and filters for industry, function, level, BSC perspective, leading/lagging and KPI type.
 - **KPI detail:** definition, formula with an example, strategic role, leading and lagging relations,
   drivers, trade-offs, gaming risks, data requirements, benchmarks, sources, quality score, a

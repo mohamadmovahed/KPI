@@ -1,6 +1,6 @@
 {
   "name": "kpi-strategy-consultant",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "description": "Offline Android app for KPI intelligence and strategy consulting. No server, no account, no internet needed.",
   "workspaces": [
