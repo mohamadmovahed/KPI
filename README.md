@@ -23,6 +23,10 @@ assistant, projects and reports all run and are stored on the phone.
 `kpi-consultant-vX.Y.Z.apk` attached to the latest release. Each release lists what changed
 (see [CHANGELOG.md](CHANGELOG.md)).
 
+To publish a new release, bump `expo.version` (and `android.versionCode`) in
+`apps/mobile/app.json` and add a CHANGELOG section. The next build creates the `vX.Y.Z` tag and the
+GitHub Release with the APK attached.
+
 **Option A: GitHub Actions (no setup).** Every push that changes the app runs
 [`.github/workflows/android-apk.yml`](.github/workflows/android-apk.yml). Open the repository's
 **Actions** tab, select the latest **Build Android APK** run, and download **kpi-consultant-apk**
